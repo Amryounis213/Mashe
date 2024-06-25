@@ -1,0 +1,2 @@
+[2024-05-21 08:11:26] production.INFO: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'key' in 'where clause' (Connection: mysql, SQL: select * from `business_settings` where `key` = system_language limit 1)  
+[2024-05-21 08:11:29] production.INFO: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'key' in 'where clause' (Connection: mysql, SQL: select * from `business_settings` where `key` = system_language limit 1)  

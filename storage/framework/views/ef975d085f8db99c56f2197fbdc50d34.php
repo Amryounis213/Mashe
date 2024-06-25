@@ -1,0 +1,1 @@
+<?php /**PATH C:\wamp64\www\Mashe-Backend-main\resources\views/admin-views/country/partials/_table.blade.php ENDPATH**/ ?>
