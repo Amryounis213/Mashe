@@ -22,7 +22,7 @@ class WalletController extends Controller
 
         $data = [
             'balance' => $user->Wallet?->balance ,
-
+            'transactions'=> $user->Wallet->Transactions 
         ];  
 
         return $this->SuccessApi($data);
@@ -71,8 +71,6 @@ class WalletController extends Controller
     {
 
     }
-
-
 
     //Visa Card Account
     public function AddCard(Request $request)

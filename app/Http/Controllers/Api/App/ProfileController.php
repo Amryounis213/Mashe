@@ -19,7 +19,7 @@ use Point;
 
 class ProfileController extends Controller
 {
-    use ApiTrait ;
+    use ApiTrait;
     public function update_image(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -29,7 +29,7 @@ class ProfileController extends Controller
 
         $image = $request->file('image');
         if ($request->has('image')) {
-            $imageName = Helpers::update(dir:'profile/',old_image: $request?->user()?->image, format:'png', image:$request->file('image'));
+            $imageName = Helpers::update(dir: 'profile/', old_image: $request?->user()?->image, format: 'png', image: $request->file('image'));
         } else {
             $imageName = $request?->user()?->image;
         }
@@ -37,24 +37,24 @@ class ProfileController extends Controller
         $userDetails = [
             'image' => $imageName,
         ];
-      
+
         return response()->json(['message' => translate('messages.successfully_updated')], 200);
     }
 
-   
+
     public function update_profile(Request $request)
     {
-       
+
         $validator = Validator::make($request->all(), [
-            'f_name' => 'required',
-            'l_name' => 'required',
-            'email' => 'nullable|unique:users,email,'.$request?->user()?->id,
+            // 'f_name' => 'nullable',
+            // 'l_name' => 'nullable',
+            'name' => 'required|max:50',
+            'email' => 'nullable|unique:users,email,' . $request?->user()?->id,
             'image' => 'nullable|max:2048',
             'password' => ['nullable', Password::min(8)],
 
         ], [
-            'f_name.required' => 'First name is required!',
-            'l_name.required' => 'Last name is required!',
+            'name.required' => 'full name is required!',
         ]);
 
         if ($validator->fails()) {
@@ -64,7 +64,7 @@ class ProfileController extends Controller
         $image = $request->file('image');
 
         if ($request->has('image')) {
-            $imageName = Helpers::update(dir:'profile/',old_image: $request?->user()?->image, format:'png', image:$request->file('image'));
+            $imageName = Helpers::update(dir: 'profile/', old_image: $request?->user()?->image, format: 'png', image: $request->file('image'));
         } else {
             $imageName = $request?->user()?->image;
         }
@@ -75,20 +75,28 @@ class ProfileController extends Controller
             $pass = $request?->user()?->password;
         }
 
+        $full_name = $request->name;
+        // Split the name by spaces
+        $name_parts = explode(' ', $full_name);
+        // Extract the first name and the last name
+        $f_name = $name_parts[0];
+        $l_name = end($name_parts);
+
+
         $userDetails = [
-            'f_name' => $request->f_name,
-            'l_name' => $request->l_name,
+            'f_name' => $f_name,
+            'l_name' => $l_name,
             'email' => $request->email ?? auth('api')->user()->email,
             'image' => $imageName,
             'password' => $pass,
             'updated_at' => now()
         ];
 
-       User::where(['id' => auth('api')->id() ])->update($userDetails);
-        if($request?->user()?->userinfo) {
-            UserInfo::where(['user_id' => auth('api')->id() ])->update([
-                'f_name' => $request->f_name,
-                'l_name' => $request->l_name,
+        User::where(['id' => auth('api')->id()])->update($userDetails);
+        if ($request?->user()?->userinfo) {
+            UserInfo::where(['user_id' => auth('api')->id()])->update([
+                'f_name' => $f_name ,
+                'l_name' => $l_name ,
                 'email' => $request->email,
                 'image' => $imageName
             ]);
@@ -96,16 +104,16 @@ class ProfileController extends Controller
 
         $token = request()->header('Authorization');
         $user = User::find(auth('api')->id());
-        return $this->SuccessApi(new UserResource($user->setAttribute('token', str_replace('Bearer ' , '' , $token))) , translate('messages.successfully_updated'));
+        return $this->SuccessApi(new UserResource($user->setAttribute('token', str_replace('Bearer ', '', $token))), translate('messages.successfully_updated'));
     }
 
     public function profile(Request $request)
     {
         $token = request()->header('Authorization');
         $user = User::find(auth('api')->id());
-        return $this->SuccessApi(new UserResource($user->setAttribute('token', str_replace('Bearer ' , '' , $token))) , translate('messages.profile'));
+        return $this->SuccessApi(new UserResource($user->setAttribute('token', str_replace('Bearer ', '', $token))), translate('messages.profile'));
     }
-    
+
 
     public function update_interest(Request $request)
     {
@@ -126,7 +134,7 @@ class ProfileController extends Controller
         return response()->json(['message' => translate('messages.interest_updated_successfully')], 200);
     }
 
-    
+
     public function update_cm_firebase_token(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -137,8 +145,8 @@ class ProfileController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
-        DB::table('users')->where('id',$request?->user()?->id)->update([
-            'cm_firebase_token'=>$request['cm_firebase_token']
+        DB::table('users')->where('id', $request?->user()?->id)->update([
+            'cm_firebase_token' => $request['cm_firebase_token']
         ]);
 
         return response()->json(['message' => translate('messages.updated_successfully')], 200);
@@ -155,21 +163,21 @@ class ProfileController extends Controller
         }
 
 
-        $zone_id= json_decode($request->header('zoneId'), true);
+        $zone_id = json_decode($request->header('zoneId'), true);
 
         $interest = $request?->user()?->interest;
-        $interest = isset($interest) ? json_decode($interest):null;
+        $interest = isset($interest) ? json_decode($interest) : null;
         // return response()->json($interest, 200);
 
-        $products =  Food::active()->whereHas('restaurant', function($q)use($zone_id){
+        $products =  Food::active()->whereHas('restaurant', function ($q) use ($zone_id) {
             $q->whereIn('zone_id', $zone_id);
         })
-        ->when(isset($interest), function($q)use($interest){
-            return $q->whereIn('category_id',$interest);
-        })
-        ->when($interest == null, function($q){
-            return $q->popular();
-        })->limit(5)->get();
+            ->when(isset($interest), function ($q) use ($interest) {
+                return $q->whereIn('category_id', $interest);
+            })
+            ->when($interest == null, function ($q) {
+                return $q->popular();
+            })->limit(5)->get();
         $products = Helpers::product_data_formatting($products, true, false, app()->getLocale());
         return response()->json($products, 200);
     }
@@ -185,7 +193,7 @@ class ProfileController extends Controller
         }
 
         $customer = $request->user();
-        $customer->zone_id = (integer)json_decode($request->header('zoneId'), true)[0];
+        $customer->zone_id = (int)json_decode($request->header('zoneId'), true)[0];
         $customer->save();
         return response()->json([], 200);
     }
@@ -194,12 +202,11 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        if(Order::where('user_id', $user->id)->where('is_guest',0)->whereIn('order_status', ['pending','accepted','confirmed','processing','handover','picked_up'])->count())
-        {
-            return response()->json(['errors'=>[['code'=>'on-going', 'message'=>translate('messages.user_account_delete_warning')]]],403);
+        if (Order::where('user_id', $user->id)->where('is_guest', 0)->whereIn('order_status', ['pending', 'accepted', 'confirmed', 'processing', 'handover', 'picked_up'])->count()) {
+            return response()->json(['errors' => [['code' => 'on-going', 'message' => translate('messages.user_account_delete_warning')]]], 403);
         }
         $request?->user()?->token()->revoke();
-        if($user?->userinfo){
+        if ($user?->userinfo) {
             $user?->userinfo?->delete();
         }
         $user->delete();

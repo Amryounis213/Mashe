@@ -4,10 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use MatanYadaev\EloquentSpatial\Objects\Polygon;
 
 class Country extends Model
 {
     use HasFactory;
+    protected $casts = [
+        'id'=>'integer',
+        'coordinates' => Polygon::class,
+    ];
+
     public function City()
     {
         return $this->hasMany(Zone::class , 'country_id');

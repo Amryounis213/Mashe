@@ -62,6 +62,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>['localization','react']], 
     // });
     Route::group(['prefix' => 'location'], function () {
         Route::get('/', 'LocationController@get_location');
+        Route::get('/check', 'LocationController@CheckLocationsArea');
         
     });
 

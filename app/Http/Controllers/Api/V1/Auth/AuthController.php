@@ -113,7 +113,7 @@ class AuthController extends Controller
                 $ref_code = Helpers::generate_referer_code($user);
                 DB::table('users')->where('phone', $user->phone)->update(['ref_code' => $ref_code]);
             }
-            return $this->SuccessApi(null, translate('messages.code_sends'));
+            return $this->SuccessApi(null, translate('messages.otp_send_successfully'));
         } else {
             $user = User::create([
                 'phone' => $PhoneNumber,
@@ -161,7 +161,7 @@ class AuthController extends Controller
                 ], 405);
             }
 
-            return $this->SuccessApi(null, translate('messages.you will recive code'));
+            return $this->SuccessApi(null, translate('messages.otp_send_successfully'));
         }
     }
 

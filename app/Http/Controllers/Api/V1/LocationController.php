@@ -14,6 +14,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Stevebauman\Location\Facades\Location;
 use App\Models\Country;
+use App\Models\Zone;
+use App\Traits\ApiTrait;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -25,29 +27,32 @@ use Geocoder\StatefulGeocoder;
 
 use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
+use MatanYadaev\EloquentSpatial\Objects\Point;
 
 class LocationController extends Controller
 {
-
+    use ApiTrait ;
     public function get_location(Request $request)
     {
         
         $apiKey = 'nohaelmandoh';
-        $clientIP = request()->ip();
+        $clientIP = $request->current_ip;
         $current_ip = $clientIP ;
         $position = Location::get($current_ip);
-
+        
         // $sa = ModelsCountry::getByIso2($position->countryCode);  
 
         // return  $position;
         // $countryCode = 'IL'; // Example: United States
         $endpoint = "http://api.geonames.org/searchJSON?country=$position->countryCode&maxRows=10&username=$apiKey";
-
+       
         $response = Http::get($endpoint);
+       
         $result = [];
         if ($response->successful()) {
             // return  $response;
             $data = $response->json();
+           
             $cities = $response['geonames'];
             // return count($cities) ;
             // Process the cities data
@@ -160,6 +165,20 @@ class LocationController extends Controller
         return response()->json(['allAreas' => $result]);
     }
 
+    public function CheckLocationsArea(Request $request)
+    {
+        $zone = Zone::whereContains('coordinates', new Point($request->latitude, $request->longitude, POINT_SRID))->get();
+
+        if (count($zone) == 0) {
+            $errors = [];
+            array_push($errors, ['code' => 'coordinates', 'message' => translate('messages.service_not_available_in_this_area')]);
+            return response()->json([
+                'errors' => $errors
+            ], 403);
+        }
+            
+        return $this->SuccessApi( $zone->pluck('id')->toArray() , 'you can use this ids in Home page requests');
+    }
     // Function to retrieve city geometries from a detailed geographic dataset or service
     // private function getCityGeometries($countryName)
     // {

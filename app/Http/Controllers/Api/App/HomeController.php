@@ -26,14 +26,20 @@ class HomeController extends Controller
 {
     use ApiTrait;
 
-    public function home_page()
+    public function home_page(Request $request)
     {
+        //areaId the app developer get it from Detector api 
+
+        $areaId = $request->areaId ;
+
         $user = auth('api')->user();
         $ads = [];
         //GET DEFAULT ADDRESS 
         $address = CustomerAddress::where('user_id', $user->id)->first();
         if (isset($address)) {
-            $zone = Zone::whereContains('coordinates', new Point($address->latitude, $address->longitude, POINT_SRID))->get();
+            // $zone = Zone::whereContains('coordinates', new Point($address->latitude, $address->longitude, POINT_SRID))->get();
+            // return $zone;
+            $zone = Zone::where('id' , $areaId)->get();
             if (count($zone) == 0) {
                 $errors = [];
                 array_push($errors, ['code' => 'coordinates', 'message' => translate('messages.service_not_available_in_this_area')]);
@@ -61,7 +67,6 @@ class HomeController extends Controller
 
         $categories = ZoneCategory::whereIn('zone_id', $zoneIds)->where('status' , 1)->get();
         $banners = Banner::where('status' , 1)->get();
-        // return $restaurants;
         $data = [
             'banners'=> BannersResource::collection($banners) ,
             'categories' => CategoryResource::collection($categories),
