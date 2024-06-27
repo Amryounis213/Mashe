@@ -38,10 +38,19 @@ class Zone extends Model
         return $this->morphMany(Translation::class, 'translationable');
     }
 
+
+    public function Country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+
     public function restaurants()
     {
         return $this->hasMany(Restaurant::class);
     }
+
+
 
     public function deliverymen()
     {

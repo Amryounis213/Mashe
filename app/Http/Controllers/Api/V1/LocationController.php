@@ -11,6 +11,7 @@ use App\CentralLogics\Helpers;
 use App\Models\BusinessSetting;
 use App\CentralLogics\CategoryLogic;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\Zone\ZoneCollection;
 use Illuminate\Support\Facades\Validator;
 use Stevebauman\Location\Facades\Location;
 use App\Models\Country;
@@ -31,136 +32,110 @@ use MatanYadaev\EloquentSpatial\Objects\Point;
 
 class LocationController extends Controller
 {
-    use ApiTrait ;
+    use ApiTrait;
     public function get_location(Request $request)
     {
-        
-        $apiKey = 'nohaelmandoh';
-        $clientIP = $request->current_ip;
-        $current_ip = $clientIP ;
-        $position = Location::get($current_ip);
-        
-        // $sa = ModelsCountry::getByIso2($position->countryCode);  
 
-        // return  $position;
-        // $countryCode = 'IL'; // Example: United States
-        $endpoint = "http://api.geonames.org/searchJSON?country=$position->countryCode&maxRows=10&username=$apiKey";
-       
-        $response = Http::get($endpoint);
-       
-        $result = [];
-        if ($response->successful()) {
-            // return  $response;
-            $data = $response->json();
-           
-            $cities = $response['geonames'];
-            // return count($cities) ;
-            // Process the cities data
-            // return gettype($data['geonames']);
-            $geonames = $data['geonames'];
-            // Check if the response contains any results
-            if (isset($data['geonames'])) {
-                for ($i = 0; $i < count($geonames); $i++) {
-                    // Access the values from the response
-                    $firstResult = $geonames[$i]; // Assuming you want the first result
-                    // return  gettype( $firstResult);
-                    if (count($firstResult) > 0) {
-                        $adminCode1 = $firstResult['adminCode1'] ?? '--';
-                        $latitude = $firstResult['lat'];
-                        $longitude = $firstResult['lng'];
-                        $distance = $this->calculateDistance($latitude,  $longitude, $position->latitude, $position->longitude);
-                        $bounds = $this->calculateBounds($latitude,  $longitude, $distance);
-                        $countryName = $firstResult['countryName'] ?? '--';
-                        $name = $firstResult['name'] ?? '--';
-                        $data = [
-                            "areaId" => $adminCode1,
-                            "coordinates" => $this->generateRandomCoordinates(40, $bounds['minLat'], $bounds['maxLat'], $bounds['minLng'],  $bounds['maxLng']),
-                            "latitude" => $latitude,
-                            "longitude" =>  $longitude,
-                            "countryName" => $countryName,
-                            "name" => $name,
-                            'distance' => $distance
+        $longitude = $request->longitude;
+        $latitude = $request->latitude;
 
-                        ];
-                        array_push($result, $data);
-                    }
-                }
-            } else {
-                // No results found
-                echo "No results found.";
-            }
-            //             foreach($cities as $c){
-            //                 // return gettype($c);
-            //                 $data_json = json_decode($c, true);
-            // return  $data_json;
-            //                 // $data=[
-            //                 //     "areaId"=> $c['adminCode1'],
-            //                 //     "coordinates"=> $this->generateRandomCoordinates(40,30,40) ,
-            //                 //     "latitude"=> $c['lat'],
-            //                 //     "longitude"=>  $c['lng'],    
-            //                 // ];
-            //                 // array_push($result, $data);
+        if (is_null($latitude) && is_null($latitude)) {
+            // $apiKey = 'nohaelmandoh';
+            // $clientIP = $request->current_ip;
+            // $current_ip = $clientIP;
+            // $position = Location::get($current_ip);
 
+
+            $ip = '82.212.78.93';
+            $response = Http::get('http://ip-api.com/json/' . $ip);
+
+            $country = $response->json();
+            // return $country ;
+            // return $position;
+            // // $sa = ModelsCountry::getByIso2($position->countryCode);  
+
+            // // return  $position;
+            // // $countryCode = 'IL'; // Example: United States
+            // $endpoint = "http://api.geonames.org/searchJSON?country=$position->countryCode&maxRows=10&username=$apiKey";
+
+            // $response = Http::get($endpoint);
+
+            // $result = [];
+            // if ($response->successful()) {
+            //     // return  $response;
+            //     $data = $response->json();
+
+            //     $cities = $response['geonames'];
+            //     // return count($cities) ;
+            //     // Process the cities data
+            //     // return gettype($data['geonames']);
+            //     $geonames = $data['geonames'];
+            //     // Check if the response contains any results
+            //     if (isset($data['geonames'])) {
+            //         for ($i = 0; $i < count($geonames); $i++) {
+            //             // Access the values from the response
+            //             $firstResult = $geonames[$i]; // Assuming you want the first result
+            //             // return  gettype( $firstResult);
+            //             if (count($firstResult) > 0) {
+            //                 $adminCode1 = $firstResult['adminCode1'] ?? '--';
+            //                 $latitude = $firstResult['lat'];
+            //                 $longitude = $firstResult['lng'];
+            //                 $distance = $this->calculateDistance($latitude,  $longitude, $position->latitude, $position->longitude);
+            //                 $bounds = $this->calculateBounds($latitude,  $longitude, $distance);
+            //                 $countryName = $firstResult['countryName'] ?? '--';
+            //                 $name = $firstResult['name'] ?? '--';
+            //                 $data = [
+            //                     "areaId" => $adminCode1,
+            //                     "coordinates" => $this->generateRandomCoordinates(40, $bounds['minLat'], $bounds['maxLat'], $bounds['minLng'],  $bounds['maxLng']),
+            //                     "latitude" => $latitude,
+            //                     "longitude" =>  $longitude,
+            //                     "countryName" => $countryName,
+            //                     "name" => $name,
+            //                     'distance' => $distance
+
+            //                 ];
+            //                 array_push($result, $data);
             //             }
+            //         }
+            //     } else {
+            //         // No results found
+            //         echo "No results found.";
+            //     }
+            //     //             foreach($cities as $c){
+            //     //                 // return gettype($c);
+            //     //                 $data_json = json_decode($c, true);
+            //     // return  $data_json;
+            //     //                 // $data=[
+            //     //                 //     "areaId"=> $c['adminCode1'],
+            //     //                 //     "coordinates"=> $this->generateRandomCoordinates(40,30,40) ,
+            //     //                 //     "latitude"=> $c['lat'],
+            //     //                 //     "longitude"=>  $c['lng'],    
+            //     //                 // ];
+            //     //                 // array_push($result, $data);
 
-            // $cityGeometries = $this->getCityGeometries($countryName);
-            // return  $cities;
+            //     //             }
+
+            //     // $cityGeometries = $this->getCityGeometries($countryName);
+            //     // return  $cities;
+            // } else {
+            //     // Handle API request failure
+            //     $errorMessage = $response->body();
+            //     return  $errorMessage;
+            // }
+
+
+            // return new Point($country['lon'], $country['lat'], POINT_SRID);
+            $country = Country::whereContains('coordinates', new Point($country['lat'], $country['lon'], POINT_SRID))->first();
+            if ($country) {
+                $zones = Zone::where('country_id', $country->id)->get();
+                return new ZoneCollection($zones)  ;   
+            } else {
+                return 'error';
+            }
         } else {
-            // Handle API request failure
-            $errorMessage = $response->body();
-            return  $errorMessage;
+            $countires = Zone::whereContains('coordinates', new Point($longitude, $latitude, POINT_SRID))->get();
+            return $countires;
         }
-
-        // Instantiate the provider (Nominatim in this case)
-        // $provider = new \Nominatim();
-
-        // // Create the provider aggregator
-        // $providerAggregator = new \ProviderAggregator();
-        // $providerAggregator->registerProvider($provider);
-
-        // // Instantiate the stateful geocoder
-        // $geocoder = new \StatefulGeocoder($providerAggregator);
-
-
-        // $result = $geocoder->geocodeQuery(\GeocodeQuery::create('New York, USA'))->first();
-
-        // if ($result !== null) {
-        //     $latitude = $result->getCoordinates()->getLatitude();
-        //     $longitude = $result->getCoordinates()->getLongitude();
-
-        //     return ( "Latitude: $latitude, Longitude: $longitude");
-        // } else {
-        //     return  ("Geocoding failed.");
-        // }
-
-
-
-        // Country name
-        // $countryName = 'Egypt';
-        // $current_ip = $request->current_ip;
-        // $position = Location::get($current_ip);
-
-        // $sa = ModelsCountry::getByIso2($position->countryCode);
-        // $states = $sa->states;
-        // return  $states;
-        // Make request to a detailed geographic dataset or service to get city geometries
-        // $cityGeometries = $this->getCityGeometries($countryName);
-
-        // $response = [];
-
-        // foreach ($cityGeometries as $cityGeometry) {
-        //     // Extract city data
-        //     $cityId = $cityGeometry['cityId'];
-        //     $cityName = $cityGeometry['cityName'];
-        //     $coordinates = $cityGeometry['coordinates'];
-
-        //     // Add city data to response
-        //     $response[] = [
-        //         'cityId' => $cityId,
-        //         'cityName' => $cityName,
-        //         'coordinates' => $coordinates
-        //     ];
-        // }
 
         return response()->json(['allAreas' => $result]);
     }
@@ -176,8 +151,8 @@ class LocationController extends Controller
                 'errors' => $errors
             ], 403);
         }
-            
-        return $this->SuccessApi( $zone->pluck('id')->toArray() , 'you can use this ids in Home page requests');
+
+        return $this->SuccessApi($zone->pluck('id')->toArray(), 'you can use this ids in Home page requests');
     }
     // Function to retrieve city geometries from a detailed geographic dataset or service
     // private function getCityGeometries($countryName)

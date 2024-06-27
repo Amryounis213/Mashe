@@ -22,6 +22,8 @@ class CountryController extends Controller
 {
     public function index(Request $request)
     {
+
+        
         $key = explode(' ', $request['search'] ?? null);
         $countries = Country::withCount(['restaurants', 'deliverymen'])
             ->when(isset($key), function ($query) use ($key) {
@@ -41,9 +43,11 @@ class CountryController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|unique:countries|max:191',
+            'code' => 'required|unique:countries|max:191',
+            'currency' => 'nullable|unique:countries|max:191',
             'coordinates' => 'nullable',
         ]);
-
+        // return $request ;
         if ($request->name[array_search('default', $request->lang)] == '') {
             $validator->getMessageBag()->add('title', translate('messages.default_Business_Country_name_is_required'));
             return response()->json(['errors' => Helpers::error_processor($validator)]);
@@ -52,21 +56,23 @@ class CountryController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)]);
         }
-        // $value = $request->coordinates;
-        // foreach(explode('),(',trim($value,'()')) as $index=>$single_array){
-        //     if($index == 0)
-        //     {
-        //         $lastcord = explode(',',$single_array);
-        //     }
-        //     $coords = explode(',',$single_array);
-        //     $polygon[] = new Point($coords[0], $coords[1]);
-        // }
-        // $Country_id=Country::all()->count() + 1;
+        $value = $request->coordinates;
+        foreach(explode('),(',trim($value,'()')) as $index=>$single_array){
+            if($index == 0)
+            {
+                $lastcord = explode(',',$single_array);
+            }
+            $coords = explode(',',$single_array);
+            $polygon[] = new Point($coords[0], $coords[1]);
+        }
+        $Country_id=Country::all()->count() + 1;
         // $polygon[] = new Point($lastcord[0], $lastcord[1]);
+
         $country = new Country();
         $country->name = $request->name[array_search('default', $request->lang)];
-        // $country->coordinates = new Polygon([new LineString($polygon)]);
-
+        $country->coordinates = new Polygon([new LineString($polygon)]);
+        $country->code = $request->code ;
+        $country->currency = $request->currency ;
         $country->save();
         $default_lang = str_replace('_', '-', app()->getLocale());
         $data = [];
