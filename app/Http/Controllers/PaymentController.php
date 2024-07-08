@@ -159,6 +159,7 @@ class PaymentController extends Controller
         }
         return response()->json(['message' => 'Payment failed'], 403);
     }
+    
     public function cancel(Request $request)
     {
         $order = Order::where(['id' => session('order_id'), 'user_id'=>session('customer_id')])->first();

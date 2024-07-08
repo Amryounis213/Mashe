@@ -27,10 +27,13 @@ class AppConfigController extends Controller
         $langs = BusinessSetting::where('key', 'system_language')->first();
         $countries = Country::where('status' , 1)->get();
         $banks = Bank::where('status' , 1)->get();
+
+        
         $DATA = [
             'languages' => LangResource::collection(json_decode($langs->value)),
             'countries'=> CountriesResource::collection($countries) ,
             'banks'=> BankResource::collection($banks),
+            // 'add_card_frame_url'=> $ifram_url ,
         ];
         return $this->SuccessApi($DATA);
 

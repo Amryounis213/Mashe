@@ -29,14 +29,19 @@ class HomeController extends Controller
     public function home_page(Request $request)
     {
         //areaId the app developer get it from Detector api 
-
+        $showMarkets = $request->ShowMarkets ?? false ;
         $areaId = $request->areaId ;
+       
+        //get Near Restaurants
+        $longitude = $request->longitude ?? '0.0';
+        $latitude = $request->latitude  ?? '0.0';
 
         $user = auth('api')->user();
         $ads = [];
         //GET DEFAULT ADDRESS 
-        $address = CustomerAddress::where('user_id', $user->id)->first();
-        if (isset($address)) {
+        // $address = CustomerAddress::where('user_id', $user->id)->where('is_default' , 1)->first();
+       
+        if ($areaId) {
             // $zone = Zone::whereContains('coordinates', new Point($address->latitude, $address->longitude, POINT_SRID))->get();
             // return $zone;
             $zone = Zone::where('id' , $areaId)->get();
@@ -47,41 +52,136 @@ class HomeController extends Controller
                     'errors' => $errors
                 ], 403);
             }
+            $zoneIds = $zone->pluck('id')->toArray();
+
+
+        }else{
+            $zone = Zone::whereContains('coordinates' , new Point($latitude, $longitude, POINT_SRID))->get();
+            if (count($zone) == 0) {
+                $errors = [];
+                array_push($errors, ['code' => 'coordinates', 'message' => translate('messages.service_not_available_in_this_area')]);
+                return response()->json([
+                    'errors' => $errors
+                ], 403);
+            }
 
             $zoneIds = $zone->pluck('id')->toArray();
         }
+        
+        if($showMarkets)
+        {
+            $partners = Restaurant::Market()->where('show_in_home_page',  1)->limit(10)->get();
+           
+        }else{
+            $partners = Restaurant::Restaurant()->where('show_in_home_page',  1)->limit(10)->get();
+          
+        }
 
-        $restaurants = Restaurant::where('show_in_home_page',  1)->limit(10)->get();
-        //get Near Restaurants
-        $lng = $address->longitude;
-        $lat = $address->latitude;
-        $distance = 10; // kilometers
-        $nearbyRestaurants = $restaurants->filter(function ($restaurant) use ($lng, $lat, $distance) {
-            $restaurantDistance = $this->getDistanceToRestaurant($restaurant, $lat, $lng);
+
+       
+
+        $distance = 100; // kilometers
+        $nearbyRestaurants = $partners->filter(function ($restaurant) use ($longitude, $latitude, $distance) {
+            $restaurantDistance = $this->getDistanceToRestaurant($restaurant, $latitude, $longitude);
             return ($restaurantDistance <= $distance) && ($restaurantDistance != 0);
-        })->map(function ($restaurant) use ($lat, $lng) {
+        })->map(function ($restaurant) use ($latitude, $longitude) {
             // Assuming getDeliveryTime is a method to calculate or retrieve delivery time
-            $restaurant->delivery_time = $this->getDeliveryTime($restaurant, $lat, $lng);
+            $restaurant->delivery_time = $this->getDeliveryTime($restaurant, $latitude, $longitude);
             return $restaurant;
         });
 
-        $categories = ZoneCategory::whereIn('zone_id', $zoneIds)->where('status' , 1)->get();
+
+        $categories = ZoneCategory::ForRestaurants()->whereIn('zone_id', $zoneIds)->where('status' , 1)->limit(10)->get();
         $banners = Banner::where('status' , 1)->get();
         $data = [
             'banners'=> BannersResource::collection($banners) ,
             'categories' => CategoryResource::collection($categories),
-            'restaurants' => RestaurantsResource::collection($nearbyRestaurants),
+            'partners' => RestaurantsResource::collection($nearbyRestaurants),
             'balance' => $user->Wallet?->balance,
         ];
 
         return $this->SuccessApi($data);
     }
 
-    public function show_restaurant($id)
+    public function market_home_page(Request $request)
+    {
+        //areaId the app developer get it from Detector api 
+        $showMarkets = $request->ShowMarkets ?? false ;
+        $areaId = $request->areaId ;
+       
+        //get Near Restaurants
+        $longitude = $request->longitude ?? '0.0';
+        $latitude = $request->latitude  ?? '0.0';
+
+        $user = auth('api')->user();
+        $ads = [];
+        //GET DEFAULT ADDRESS 
+        // $address = CustomerAddress::where('user_id', $user->id)->where('is_default' , 1)->first();
+       
+        if ($areaId) {
+            // $zone = Zone::whereContains('coordinates', new Point($address->latitude, $address->longitude, POINT_SRID))->get();
+            // return $zone;
+            $zone = Zone::where('id' , $areaId)->get();
+            if (count($zone) == 0) {
+                $errors = [];
+                array_push($errors, ['code' => 'coordinates', 'message' => translate('messages.service_not_available_in_this_area')]);
+                return response()->json([
+                    'errors' => $errors
+                ], 403);
+            }
+            $zoneIds = $zone->pluck('id')->toArray();
+
+
+        }else{
+            $zone = Zone::whereContains('coordinates' , new Point($latitude, $longitude, POINT_SRID))->get();
+            if (count($zone) == 0) {
+                $errors = [];
+                array_push($errors, ['code' => 'coordinates', 'message' => translate('messages.service_not_available_in_this_area')]);
+                return response()->json([
+                    'errors' => $errors
+                ], 403);
+            }
+
+            $zoneIds = $zone->pluck('id')->toArray();
+        }
+        
+        $partners = Restaurant::Market()->where('show_in_home_page',  1)->limit(10)->get();
+           
+        $distance = 100; // kilometers
+        $nearbyRestaurants = $partners->filter(function ($restaurant) use ($longitude, $latitude, $distance) {
+            $restaurantDistance = $this->getDistanceToRestaurant($restaurant, $latitude, $longitude);
+            return ($restaurantDistance <= $distance) && ($restaurantDistance != 0);
+        })->map(function ($restaurant) use ($latitude, $longitude) {
+            // Assuming getDeliveryTime is a method to calculate or retrieve delivery time
+            $restaurant->delivery_time = $this->getDeliveryTime($restaurant, $latitude, $longitude);
+            return $restaurant;
+        });
+
+
+        $categories = ZoneCategory::ForMarkets()->whereIn('zone_id', $zoneIds)->where('status' , 1)->limit(10)->get();
+        $banners = Banner::where('status' , 1)->get();
+        $data = [
+            'banners'=> BannersResource::collection($banners) ,
+            'categories' => CategoryResource::collection($categories),
+            'partners' => RestaurantsResource::collection($nearbyRestaurants),
+            'balance' => $user->Wallet?->balance,
+        ];
+
+        return $this->SuccessApi($data);
+    }
+
+
+
+    public function show_partner($id)
     {
         $restaurant = Restaurant::where('id', $id)->first();
         return $this->SuccessApi(new RestaurantDetailsResource($restaurant));
     }
+
+
+
+
+    
 
 
     

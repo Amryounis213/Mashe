@@ -5367,4 +5367,5 @@
   'Want_to_deactivate_this_country?' => 'Want to deactivate this country ',
   'Want_to_delete_this_country' => 'Want to delete this country',
   'New_country_Created_Successfully!' => 'New country Created Successfully!',
+  'Operation successful' => 'Operation successful',
 );

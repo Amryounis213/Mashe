@@ -41,4 +41,16 @@ class ZoneCategory extends Model
         // return $translation;
         return $translation ? $translation->value : $this->attributes['name'];
     }
+
+
+    public function scopeForMarkets($query)
+    {
+        return $query->where('is_market_category', 1);
+    }
+
+    public function scopeForRestaurants($query)
+    {
+        return $query->where('is_market_category', 0);
+    }
+
 }

@@ -469,7 +469,8 @@ Route::group(['namespace' => 'Api\App', 'prefix' => 'app' ,'middleware'=>['local
 
     Route::group(['prefix' => 'home' ,'middleware'=>['localization' , 'auth:api']], function () {
         Route::get('/', 'HomeController@home_page');
-        Route::get('/restaurant/{id}', 'HomeController@show_restaurant');
+        Route::get('/partner/{id}', 'HomeController@show_partner');
+        Route::get('/markets', 'HomeController@market_home_page');
 
        
     });
@@ -477,6 +478,19 @@ Route::group(['namespace' => 'Api\App', 'prefix' => 'app' ,'middleware'=>['local
     Route::group(['prefix' => 'wallet' ,'middleware'=>['localization' , 'auth:api']], function () {
         Route::get('/', 'WalletController@WalletPage');
         Route::post('/send', 'WalletController@SendMoney');
+
+        // TopUpFrameURL
+        Route::post('/topup', 'WalletController@TopUp');
+
+        Route::post('/add-card', 'WalletController@AddCard');
+
+        Route::get('/GetYaadIframeUrl', 'WalletController@GetYaadIframeUrl');
+
+        
+        Route::get('/cards', 'WalletController@getCardAccounts');
+
+        Route::get('/pagetest', 'WalletController@ShowPageFrame');
+
         
         //favorite 
         Route::get('favorite' , [FavouriteController::class, 'index']);

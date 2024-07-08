@@ -225,6 +225,17 @@ class Restaurant extends Model
         return (string)($this->free_delivery_distance?json_decode($this->free_delivery_distance, true)['value']:'');
     }
 
+    public function scopeMarket($query)
+    {
+        $query->where('is_market',1);
+    }
+
+    public function scopeRestaurant($query)
+    {
+        $query->where('is_market',0);
+    }
+
+
     public function scopeDelivery($query)
     {
         $query->where('delivery',1);
