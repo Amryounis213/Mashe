@@ -30,6 +30,13 @@ use App\Http\Controllers\PaystackController;
 |
 */
 
+
+Route::get('/', function () {
+    return 'First sub domain';
+})->domain('user.' . env('APP_URL'));
+
+
+
 Route::get('/', 'HomeController@index')->name('home');
 Route::view('subscription/payment/view' , 'Subscription_payment_view')->name('subscription_payment_view');
 

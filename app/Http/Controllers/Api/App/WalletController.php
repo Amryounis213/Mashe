@@ -142,9 +142,9 @@ class WalletController extends Controller
 
         // // Save card details to the database (without CVV)
         // $request->merge([
-           
+
         // ]);
-        
+
         // CardAccount::create([
         //     'number' => $cardNumber,
         //     'expiry_date' => $expiryDate,
@@ -263,7 +263,7 @@ class WalletController extends Controller
     {
 
         $user = auth('api')->user();
-        $full_url = 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay3ds.pl/?Amount=30&ClientName='.$user->name . '&Info=972537289982&J5=True&Masof=0010131918&MoreData=True&Order=GiveItName&PageLang=HEB&Sign=True&Tash=1&UTF8=True&UTF8out=True&action=pay&tmp=7';
+        $full_url = 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay3ds.pl/?Amount=30&ClientName=' . $user->name . '&Info=972537289982&J5=True&Masof=0010131918&MoreData=True&Order=GiveItName&PageLang=HEB&Sign=True&Tash=1&UTF8=True&UTF8out=True&action=pay&tmp=7';
         return $this->SuccessApi($full_url);
     }
 

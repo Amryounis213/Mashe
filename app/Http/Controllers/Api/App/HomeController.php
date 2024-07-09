@@ -145,10 +145,12 @@ class HomeController extends Controller
             $zoneIds = $zone->pluck('id')->toArray();
         }
         
-        $partners = Restaurant::Market()->where('show_in_home_page',  1)->limit(10)->get();
-           
+        $partners = Restaurant::Market();
+        $HomePagePartners = $partners->where('show_in_home_page', 1 )->limit(10)->get();
+        $IsFeaturedPartners = $partners->where('is_featured', 1 )->limit(10)->get();
+
         $distance = 100; // kilometers
-        $nearbyRestaurants = $partners->filter(function ($restaurant) use ($longitude, $latitude, $distance) {
+        $nearbyRestaurants = $HomePagePartners->filter(function ($restaurant) use ($longitude, $latitude, $distance) {
             $restaurantDistance = $this->getDistanceToRestaurant($restaurant, $latitude, $longitude);
             return ($restaurantDistance <= $distance) && ($restaurantDistance != 0);
         })->map(function ($restaurant) use ($latitude, $longitude) {
@@ -160,6 +162,31 @@ class HomeController extends Controller
 
         $categories = ZoneCategory::ForMarkets()->whereIn('zone_id', $zoneIds)->where('status' , 1)->limit(10)->get();
         $banners = Banner::where('status' , 1)->get();
+
+        $sections = [
+            'sectionOne' => [
+                'title' => 'Banners',
+                'data' => $banners,
+            ],
+            'sectionTwo' => [
+                'title' => 'Popular Stores',
+                'data' => $partners->where('is_featured', 1 )->limit(10)->get(), 
+            ],
+            'sectionThree' => [
+                'title' => 'Categories',
+                'data' => $categories ,
+            ],
+            'sectionFour' => [
+                'title' => 'Featured ',
+                'data' => $partners->where('is_featured', 1 )->limit(10)->get()
+            ],
+
+
+        ];
+        return response()->json($sections);
+
+
+
         $data = [
             'banners'=> BannersResource::collection($banners) ,
             'categories' => CategoryResource::collection($categories),
