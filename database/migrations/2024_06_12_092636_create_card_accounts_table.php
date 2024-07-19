@@ -13,12 +13,19 @@ return new class extends Migration
     {
         Schema::create('card_accounts', function (Blueprint $table) {
             $table->id();
-            
-            $table->string('number')->nullable();
+
+            $table->text('token')->nullable();
+            $table->string('transaction_id')->nullable();
+
+
             $table->string('holder_name')->nullable();
-            $table->string('customer_id')->nullable();
-            $table->string('expiry_date');
-            $table->unsignedInteger('cvv');
+            $table->string('holder_id')->nullable();
+
+            $table->string('Tmonth')->nullable();
+            $table->string('Tyear')->nullable();
+            $table->string('last_4_digits')->nullable();
+            $table->string('brand')->nullable();
+            $table->string('issuer')->nullable();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->boolean('default')->default(false);
 

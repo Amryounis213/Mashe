@@ -60,6 +60,10 @@ return [
             'driver' => 'passport',
             'provider' => 'users',
         ],
+        'restaurant' => [
+            'driver' => 'passport',
+            'provider' => 'restaurants',
+        ],
         'customer' => [
             'driver' => 'session',
             'provider' => 'users',
@@ -107,6 +111,12 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\VendorEmployee::class,
         ],
+        
+        'restaurants' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Restaurant::class,
+        ],
+        
 
         'delivery_men' => [
             'driver' => 'database',

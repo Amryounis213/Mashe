@@ -14,5 +14,12 @@ class CustomerWallet extends Model
         return $this->hasMany(CustomerWalletTransaction::class , 'wallet_id')->orderBy('created_at' , 'DESC');
     }
 
+
+
+    public function User()
+    {
+        return $this->belongsTo(User::class , 'user_id');
+    }
+
     
 }

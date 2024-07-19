@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 use App\Traits\ReportFilter;
+use Laravel\Passport\HasApiTokens;
 
 class Restaurant extends Model
 {
-    use HasFactory, ReportFilter;
+    use HasFactory, ReportFilter , HasApiTokens;
     protected $fillable = ['food_section','status'];
 
     protected $with = ['restaurant_config'];

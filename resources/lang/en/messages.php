@@ -5368,4 +5368,10 @@
   'Want_to_delete_this_country' => 'Want to delete this country',
   'New_country_Created_Successfully!' => 'New country Created Successfully!',
   'Operation successful' => 'Operation successful',
+  'otp_send_successfully' => 'Otp send successfully',
+  'login_successfully' => 'Login successfully',
+  'payments_methods' => 'Payments methods',
+  'customer_wallet_disable_warning' => 'Customer wallet disable warning',
+  'pick_up_is_disabled' => 'Pick up is disabled',
+  'restaurant_is_closed_at_order_time' => 'Restaurant is closed at order time',
 );

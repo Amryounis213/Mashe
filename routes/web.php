@@ -18,6 +18,7 @@ use App\Http\Controllers\SenangPayController;
 use App\Http\Controllers\MercadoPagoController;
 use App\Http\Controllers\BkashPaymentController;
 use App\Http\Controllers\PaystackController;
+use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,9 +32,10 @@ use App\Http\Controllers\PaystackController;
 */
 
 
-Route::get('/', function () {
-    return 'First sub domain';
-})->domain('user.' . env('APP_URL'));
+Route::get('/optimze-server', function () {
+   Artisan::call('cache:clear');
+   Artisan::call('route:clear');
+});
 
 
 

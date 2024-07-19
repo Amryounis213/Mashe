@@ -449,6 +449,7 @@ Route::group(['namespace' => 'Api\V1\Auth', 'prefix' => 'auth'], function () {
 
 Route::group(['namespace' => 'Api\App', 'prefix' => 'app' ,'middleware'=>['localization']], function () {
     Route::get('/config', 'AppConfigController@CustomerApp');
+    Route::get('/payment_methods', 'WalletController@PaymentMethods');
 
     //Address
     Route::group(['prefix' => 'address' ,'middleware'=>['localization' , 'auth:api']], function () {
@@ -468,9 +469,9 @@ Route::group(['namespace' => 'Api\App', 'prefix' => 'app' ,'middleware'=>['local
     });
 
     Route::group(['prefix' => 'home' ,'middleware'=>['localization' , 'auth:api']], function () {
-        Route::get('/', 'HomeController@home_page');
-        Route::get('/partner/{id}', 'HomeController@show_partner');
-        Route::get('/markets', 'HomeController@market_home_page');
+        Route::get('/', 'HomeController@home_page')->withoutMiddleware('auth:api');
+        Route::get('/partner/{id}', 'HomeController@show_partner')->withoutMiddleware('auth:api');
+        Route::get('/markets', 'HomeController@market_home_page')->withoutMiddleware('auth:api');
 
        
     });
@@ -482,9 +483,12 @@ Route::group(['namespace' => 'Api\App', 'prefix' => 'app' ,'middleware'=>['local
         // TopUpFrameURL
         Route::post('/topup', 'WalletController@TopUp');
 
-        Route::post('/add-card', 'WalletController@AddCard');
+        // Route::post('/add-card', 'WalletController@AddCard')->withoutMiddleware('auth:api');
+        Route::any('/add-card', 'WalletController@AddCard')->withoutMiddleware('auth:api');
 
         Route::get('/GetYaadIframeUrl', 'WalletController@GetYaadIframeUrl');
+
+        Route::get('/getToken', 'WalletController@getTokenForCard');
 
         
         Route::get('/cards', 'WalletController@getCardAccounts');
@@ -497,6 +501,14 @@ Route::group(['namespace' => 'Api\App', 'prefix' => 'app' ,'middleware'=>['local
         Route::post('favorite' , [FavouriteController::class, 'store']);
 
        
+    });
+
+
+
+    Route::group(['prefix' => 'order' ,'middleware'=>['localization' , 'auth:api']], function () {
+
+        Route::post('/place_order', 'OrderController@place_order');
+        
     });
 
 

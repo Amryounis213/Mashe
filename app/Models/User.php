@@ -59,7 +59,7 @@ class User extends Authenticatable
 
     public function userinfo()
     {
-        return $this->hasOne(UserInfo::class,'user_id', 'id');
+        return $this->hasOne(UserInfo::class, 'user_id', 'id');
     }
 
     public function orders()
@@ -67,7 +67,8 @@ class User extends Authenticatable
         return $this->hasMany(Order::class)->where('is_guest', 0);
     }
 
-    public function addresses(){
+    public function addresses()
+    {
         return $this->hasMany(CustomerAddress::class);
     }
 
@@ -78,10 +79,10 @@ class User extends Authenticatable
 
     public function CartMemory()
     {
-        return $this->hasOne(CartResult::class , 'user_id' , 'id');
+        return $this->hasOne(CartResult::class, 'user_id', 'id');
     }
 
-    
+
     public function Wallet()
     {
         return $this->hasOne(CustomerWallet::class);
@@ -95,11 +96,38 @@ class User extends Authenticatable
 
     public function category_visit_log()
     {
-        return $this->morphedByMany(Category::class ,'visitor_log' );
+        return $this->morphedByMany(Category::class, 'visitor_log');
     }
     public function restaurant_visit_log()
     {
-        return $this->morphedByMany(Restaurant::class ,'visitor_log' );
+        return $this->morphedByMany(Restaurant::class, 'visitor_log');
     }
 
+
+    public function getFullNameAttribute()
+    {
+        return $this->f_name . ' ' . $this->l_name;
+    }
+
+    // Add this function to your User model
+    public function setPhoneAttribute($value)
+    {
+        // Remove the "+" sign from the phone number
+        $this->attributes['phone'] = str_replace('+', '', $value);
+    }
+
+
+    // public function getPhoneAttribute()
+    // {
+    //     return str_replace('+', '', $this->phone);
+    // }
+
+
+    public function getImagePathAttribute()
+    {
+        if ($this->image) {
+            return $this->image;
+        }
+        return 'https://www.shutterstock.com/image-illustration/call-center-staff-talking-provide-600nw-2074932583.jpg';
+    }
 }

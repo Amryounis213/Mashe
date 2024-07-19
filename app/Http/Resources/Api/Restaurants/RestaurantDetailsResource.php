@@ -19,7 +19,7 @@ class RestaurantDetailsResource extends JsonResource
      */
     public function toArray($request)
     {
-
+       
         $menus = ParentCategory::with(['Foods' => function($qu){
             $qu->orderBy('sort_number');
         }])->whereHasMorph(
@@ -30,15 +30,29 @@ class RestaurantDetailsResource extends JsonResource
             }
         )->get();
 
+        $banners = [];
+
+        $banners [0] = [
+            'id'=> 1 ,
+            'title'=> 'get flat 20% off' ,
+            'details'=> 'for all customers up to 20 $ for order above 50$' ,
+        ];
+
+        $banners [1] = [
+            'id'=> 2 ,
+            'title'=> 'get free delivery' ,
+            'details'=> 'for all customers register until friday' ,
+        ];
         
         return [
             'id' => $this->id,
             'name' => $this->name ,           
             'logo' => dynamicStorage('storage/app/public/restaurant').'/'.$this['logo'],
             'cover_photo' => dynamicStorage('storage/app/public/restaurant/cover').'/'.$this['cover_photo'],
-            // 'time'=> round($this->delivery_time), 
-            'is_open'=> $this->isOpen($this) , 
+            'is_open'=> $this->isOpen($this),
+            'banners' => $banners ,
             'menues'=> RestaurantsMenuResource::collection($menus) ,
+            
         ];
        
     }

@@ -16,8 +16,9 @@ use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
 |
 */
 
-Route::group(['namespace' => 'Api\V1', 'middleware'=>['localization','react']], function () {
+Route::group(['namespace' => 'Api\Restaurant', 'middleware'=>['localization']], function () {
    
+    Route::post('/login', 'AuthController@login');
 
     Route::group(['prefix' => 'vendor', 'namespace' => 'Vendor', 'middleware'=>['vendor.api']], function () {
         Route::get('notifications', 'VendorController@get_notifications');
@@ -142,6 +143,8 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>['localization','react']], 
         });
         Route::put('send-order-otp', 'VendorController@send_order_otp');
     });
+
+
 
 
     Route::group(['prefix' => 'config'], function () {

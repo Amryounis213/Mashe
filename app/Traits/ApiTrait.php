@@ -17,6 +17,7 @@ trait ApiTrait {
             'code' => $code ,
             'message' => $msg ,
             'data' => $user ,
+            
         ];
         return response()->json($data , $code);
     }

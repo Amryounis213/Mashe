@@ -49,7 +49,7 @@ class ProfileController extends Controller
             // 'f_name' => 'nullable',
             // 'l_name' => 'nullable',
             'name' => 'required|max:50',
-            'email' => 'nullable|unique:users,email,' . $request?->user()?->id,
+            'email' => 'nullable|unique:users,email,' . auth('api')->id(),
             'image' => 'nullable|max:2048',
             'password' => ['nullable', Password::min(8)],
 
