@@ -73,7 +73,8 @@ class WalletController extends Controller
             return $this->SuccessApi($data, translate('data return successfully'));
         } elseif ($Reciver && ($confirm_send == 1)) {
             $ReciverWallet = CustomerWallet::where('user_id', $Reciver->id)->first();
-
+            if(!$ReciverWallet)
+                $ReciverWallet = $Reciver->Wallet()->create();
 
             $ReciverWallet->balance = $ReciverWallet->balance + $request->amount;
             $ReciverWallet->save();
